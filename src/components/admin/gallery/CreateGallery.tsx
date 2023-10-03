@@ -1,28 +1,42 @@
 "use client";
-import { AddTagDocument, AddTagMutation, AddTagMutationVariables, Tag } from "@/gql/graphql";
+import Alert from "@/components/Alert";
+import {
+  AddSectionDocument,
+  AddSectionMutation,
+  AddSectionMutationVariables,
+  Section,
+} from "@/gql/graphql";
+import { addSectionSchema } from "@/types/section";
+import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { OperationResult, useMutation } from "urql";
 
 interface Props {
-  data: Tag[]
-  setData: React.Dispatch<React.SetStateAction<Tag[]>>
+  data: Section[];
+  setData: React.Dispatch<React.SetStateAction<Section[]>>;
+  isOpen: boolean;
 }
 
-const CreateTag = (props: Props) => {
-  const [name, setName] = React.useState<string>('');
-  const [state, CreateTagExecute] = useMutation(AddTagDocument);
-   
+const CreateSection = (props: Props) => {
+  const [isError, setIsError] = React.useState<boolean>(false);
+  const [isSuccess, setIsSuccess] = React.useState<boolean>(false);
+  const [name, setName] = React.useState<string>("");
+  const [state, CreateSectionExecute] = useMutation(AddSectionDocument);
 
   const HandleSubmit = async (data: any) => {
-    const datas: OperationResult<AddTagMutation, AddTagMutationVariables> = await CreateTagExecute({
-      name: data.name
+    const datas: OperationResult<
+      AddSectionMutation,
+      AddSectionMutationVariables
+    > = await CreateSectionExecute({
+      name: data.name,
     });
 
-    if (datas.data?.createTag) {
-      toast.success("Tag Added");
-      props.setData([...props.data, datas.data?.createTag as Tag]);
-    } else {
+    if (datas.data?.createSection) {
+      toast.success("Section Added");
+      props.setData([...props.data, datas.data?.createSection as Section]);
+    } else{
       datas.error?.message.split("]")[1].startsWith(" target") ? toast.error("server error") : toast.error(datas.error?.message.split("]")[1]);
     }
   };
@@ -60,8 +74,11 @@ const CreateTag = (props: Props) => {
           ></div>
         </div>
       </form>
+      <Alert isError={isError} setError={setIsError} isSuccess={isSuccess}>
+
+      </Alert>
     </div>
   );
 };
 
-export default CreateTag;
+export default CreateSection;
